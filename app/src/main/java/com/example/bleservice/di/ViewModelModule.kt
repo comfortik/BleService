@@ -9,6 +9,7 @@ import com.example.bleservice.domain.interactor.device.ConnectDeviceInteractor
 import com.example.bleservice.domain.interactor.device.DeviceInteractors
 import com.example.bleservice.domain.interactor.device.DisconnectDeviceInteractor
 import com.example.bleservice.domain.interactor.device.ScanDevicesInteractor
+import com.example.bleservice.domain.interactor.device.StopScanInteractor
 import com.example.bleservice.domain.repository.DataPacketRepository
 import com.example.bleservice.domain.repository.DeviceRepository
 import dagger.Module
@@ -40,7 +41,8 @@ object ViewModelModule {
         return DeviceInteractorsImpl(
             scanDevicesInteractor = ScanDevicesInteractor(deviceRepository),
             connectDeviceInteractor = ConnectDeviceInteractor(deviceRepository),
-            disconnectDeviceInteractor = DisconnectDeviceInteractor(deviceRepository)
+            disconnectDeviceInteractor = DisconnectDeviceInteractor(deviceRepository),
+            stopScanInteractor = StopScanInteractor(deviceRepository)
         )
     }
 }

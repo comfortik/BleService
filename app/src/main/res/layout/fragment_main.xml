@@ -9,7 +9,7 @@
     tools:context=".features.main.ui.MainFragment">
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="400dp"
         android:id="@+id/recyclerView"/>
 
 
@@ -32,6 +32,16 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="16dp"
         android:text="Send Data" />
+    <Button
+        android:id="@+id/btn_stop_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop scan"/>
+    <Button
+        android:id="@+id/btn_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect device"/>
 
 
 
