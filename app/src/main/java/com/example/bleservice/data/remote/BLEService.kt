@@ -19,6 +19,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.IBinder
+import android.os.ParcelUuid
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,22 +57,27 @@ class BLEService : Service() {
     }
 
     fun scanForDevices(callback: (BluetoothDevice) -> Unit) {
-
         adapter = BluetoothAdapter.getDefaultAdapter()
         if (!adapter.isEnabled) {
             Log.e("BLES", "Bluetooth is not enabled")
             return
         }
+
+
+
+        val settings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 super.onScanResult(callbackType, result)
-//                if(!result.device.name.isNullOrBlank())
-                    callback(result.device)
+                callback(result.device)
             }
 
             override fun onBatchScanResults(results: List<ScanResult>) {
                 super.onBatchScanResults(results)
-
+                results.forEach { result -> callback(result.device) }
             }
 
             override fun onScanFailed(errorCode: Int) {
@@ -80,11 +86,10 @@ class BLEService : Service() {
             }
         }
 
-
-
-        adapter.bluetoothLeScanner.startScan(scanCallback)
+        adapter.bluetoothLeScanner.startScan(null, settings, scanCallback)
         Log.d("BLES", "Scanning started")
     }
+
 
     fun stopScanning() {
         Log.d("BLEService", "Scan stopped")
