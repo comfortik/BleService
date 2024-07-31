@@ -10,5 +10,4 @@ interface DeviceRepository{
     fun scanDevices(callback : ((BluetoothDevice)->Unit))
     fun stopScan()
     fun connectDevice(device: BluetoothDevice, successListener: SuccessListener<Boolean>, errorListener: ErrorListener)
-    fun disconnectDevice(device: BluetoothDevice)
 }

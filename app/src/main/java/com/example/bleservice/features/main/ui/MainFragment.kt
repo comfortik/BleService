@@ -15,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bleservice.databinding.FragmentMainBinding
 import com.example.bleservice.features.main.adapter.DeviceAdapter
 import com.example.bleservice.features.main.presentation.MainViewModel
+import com.example.bleservice.features.utlis.DataTransferState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -51,47 +53,46 @@ class MainFragment : Fragment(), DeviceAdapter.OnItemClickListener{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initAdapter()
+        initObservers()
+        initListeners()
+    }
+
+    override fun onItemClick(device: BluetoothDevice) {
+        viewModel.stopScan()
+        viewModel.connectDevice(device)
+        (binding.recyclerView.adapter as? DeviceAdapter)?.notifyDataSetChanged()
+    }
+    fun initAdapter(){
         adapter = DeviceAdapter(this)
         binding.recyclerView.adapter = adapter
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 
-            }
-        }
-
-
+    }
+    fun initObservers(){
         viewModel.devices.observe(viewLifecycleOwner) {
-
             adapter.submitList(it)
         }
         viewModel.connectState.observe(viewLifecycleOwner){
-            binding.textView.text = it.name
+            binding.textView.text = "Connection state: ${it.name}"
         }
         viewModel.dataPacketState.observe(viewLifecycleOwner){
-            binding.dataListener.text = it.toString()
+            binding.textView.text = "Sending data state: ${it}"
         }
-
+    }
+    fun initListeners(){
         binding.buttonStart.setOnClickListener {
-
-                viewModel.scanDevices()
-
-
+            adapter.clearItems()
+            viewModel.scanDevices()
         }
         binding.btnStopScan.setOnClickListener {
             viewModel.stopScan()
         }
 
         binding.buttonSendData.setOnClickListener {
-            viewModel.sendData("hello")
+            viewModel.sendData("Hello")
         }
-
-    }
-
-    override fun onItemClick(device: BluetoothDevice) {
-        viewModel.connectDevice(device)
     }
 
 

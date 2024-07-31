@@ -7,7 +7,7 @@ import com.example.bleservice.domain.model.DataPacket
 import com.example.bleservice.domain.repository.DataPacketRepository
 import com.example.bleservice.domain.utils.ErrorListener
 import com.example.bleservice.domain.utils.SuccessListener
-import com.example.bleservice.features.main.presentation.DataTransferState
+import com.example.bleservice.features.utlis.DataTransferState
 import javax.inject.Inject
 
 class DataPacketRepositoryImpl @Inject constructor(
@@ -32,7 +32,6 @@ class DataPacketRepositoryImpl @Inject constructor(
                 val start = currentIndex * BLOCK_SIZE
                 val end = (start + BLOCK_SIZE).coerceAtMost(data.size)
                 val block = data.copyOfRange(start, end)
-
                 service.writeData(block,successListener, errorListener )
                 currentIndex++
 
@@ -43,7 +42,4 @@ class DataPacketRepositoryImpl @Inject constructor(
         sendNextBlock()
     }
 
-    override fun receiveData(): DataPacket {
-        TODO("Not yet implemented")
-    }
 }

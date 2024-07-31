@@ -3,11 +3,9 @@ package com.example.bleservice.di
 import com.example.bleservice.data.repository.DataPacketInteractorsImpl
 import com.example.bleservice.data.repository.DeviceInteractorsImpl
 import com.example.bleservice.domain.interactor.dataPacket.DataPacketInteractors
-import com.example.bleservice.domain.interactor.dataPacket.ReceiveDataPacketInteractor
 import com.example.bleservice.domain.interactor.dataPacket.SendDataPacketInteractor
 import com.example.bleservice.domain.interactor.device.ConnectDeviceInteractor
 import com.example.bleservice.domain.interactor.device.DeviceInteractors
-import com.example.bleservice.domain.interactor.device.DisconnectDeviceInteractor
 import com.example.bleservice.domain.interactor.device.ScanDevicesInteractor
 import com.example.bleservice.domain.interactor.device.StopScanInteractor
 import com.example.bleservice.domain.repository.DataPacketRepository
@@ -28,8 +26,7 @@ object ViewModelModule {
         dataPacketRepository: DataPacketRepository
     ): DataPacketInteractors {
         return DataPacketInteractorsImpl(
-            sendDataPacketInteractor = SendDataPacketInteractor(dataPacketRepository),
-            receiveDataPacketInteractor = ReceiveDataPacketInteractor(dataPacketRepository)
+            sendDataPacketInteractor = SendDataPacketInteractor(dataPacketRepository)
         )
     }
 
@@ -41,7 +38,6 @@ object ViewModelModule {
         return DeviceInteractorsImpl(
             scanDevicesInteractor = ScanDevicesInteractor(deviceRepository),
             connectDeviceInteractor = ConnectDeviceInteractor(deviceRepository),
-            disconnectDeviceInteractor = DisconnectDeviceInteractor(deviceRepository),
             stopScanInteractor = StopScanInteractor(deviceRepository)
         )
     }

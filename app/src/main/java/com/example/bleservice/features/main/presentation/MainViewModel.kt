@@ -10,6 +10,8 @@ import com.example.bleservice.domain.model.DataPacket
 import com.example.bleservice.domain.model.Error
 import com.example.bleservice.domain.utils.ErrorListener
 import com.example.bleservice.domain.utils.SuccessListener
+import com.example.bleservice.features.utlis.DataTransferState
+import com.example.bleservice.features.utlis.MainState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -58,7 +60,7 @@ class MainViewModel @Inject constructor(
             },
             object : ErrorListener {
                 override fun onError(error: Error) {
-                    _connectState.value = MainState.ERROR
+                    _connectState.postValue( MainState.ERROR)
                 }
 
             }
@@ -68,7 +70,7 @@ class MainViewModel @Inject constructor(
     fun sendData(data: String) {
         val dataBytes = data.toByteArray()
         val dataPacket = DataPacket(data = dataBytes)
-
+        _dataPacketState.postValue(DataTransferState.IDLE.toString())
         dataPacketInteractors.sendDataPacketInteractor().execute(
             dataPacket,
             object : SuccessListener<DataTransferState> {
@@ -82,10 +84,5 @@ class MainViewModel @Inject constructor(
                 }
             }
         )
-    }
-
-
-    fun disconnectDevice(device: BluetoothDevice) {
-        deviceInteractors.disconnectDeviceInteractor().execute(device)
     }
 }

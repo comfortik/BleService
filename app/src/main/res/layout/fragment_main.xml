@@ -5,49 +5,47 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/white"
     android:gravity="center"
     tools:context=".features.main.ui.MainFragment">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tap the item to connect"
+        android:layout_marginBottom="8dp"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:id="@+id/recyclerView"/>
-
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="-"
         android:layout_marginVertical="16dp" />
-    <TextView
-        android:id="@+id/dataListener"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="-"
-        android:textColor="@color/white"
-        android:background="@color/black"
-        android:layout_marginVertical="16dp"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/button_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:cornerRadius="5dp"
+        android:backgroundTint="@color/btn"
         android:text="Start scan"/>
-    <Button
-        android:id="@+id/button_send_data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="16dp"
-        android:text="Send Data" />
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_stop_scan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:cornerRadius="5dp"
+        android:backgroundTint="@color/btn"
         android:text="Stop scan"/>
-
-
-
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_send_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cornerRadius="5dp"
+        android:backgroundTint="@color/btn"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:text="Send Data" />
 
 
 </LinearLayout>

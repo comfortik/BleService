@@ -20,6 +20,5 @@ class DeviceRepositoryImpl @Inject constructor(private val service: BLEService) 
         service.connectDevice(device, successListener, errorListener)
     }
 
-    override fun disconnectDevice(device: BluetoothDevice) {
-    }
+
 }

@@ -4,7 +4,7 @@ import com.example.bleservice.domain.model.DataPacket
 import com.example.bleservice.domain.repository.DataPacketRepository
 import com.example.bleservice.domain.utils.ErrorListener
 import com.example.bleservice.domain.utils.SuccessListener
-import com.example.bleservice.features.main.presentation.DataTransferState
+import com.example.bleservice.features.utlis.DataTransferState
 
 class SendDataPacketInteractor(private val dataPacketRepository: DataPacketRepository) {
     fun execute(dataPacket: DataPacket, successListener: SuccessListener<DataTransferState>, errorListener: ErrorListener){

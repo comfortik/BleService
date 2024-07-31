@@ -1,6 +1,5 @@
 package com.example.bleservice.data.remote
 
-import android.Manifest
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -9,28 +8,19 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
-import android.bluetooth.BluetoothSocket
 import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.IBinder
-import android.os.ParcelUuid
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import com.example.bleservice.domain.utils.ErrorListener
 import com.example.bleservice.domain.utils.SuccessListener
 import com.example.bleservice.domain.model.Error
-import com.example.bleservice.features.main.presentation.DataTransferState
-import dagger.hilt.android.AndroidEntryPoint
+import com.example.bleservice.features.utlis.DataTransferState
 import java.util.UUID
-import javax.inject.Inject
-
-
 
 
 class BLEService : Service() {
@@ -77,7 +67,9 @@ class BLEService : Service() {
         scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 super.onScanResult(callbackType, result)
-                callback(result.device)
+                if(result.device.name!=null){
+                    callback(result.device)
+                }
             }
 
             override fun onBatchScanResults(results: List<ScanResult>) {

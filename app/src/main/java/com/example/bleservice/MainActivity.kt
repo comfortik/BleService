@@ -16,6 +16,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var serviceIntent:Intent
     private val REQUEST_CODE_BLUETOOTH = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,20 +28,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12 и выше
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.BLUETOOTH_SCAN
                 ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_ADVERTISE
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(
                         Manifest.permission.BLUETOOTH_SCAN,
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.BLUETOOTH_ADVERTISE
                     ),
                     REQUEST_CODE_BLUETOOTH
                 )
@@ -80,7 +85,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_BLUETOOTH) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
@@ -93,11 +102,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startBLEService() {
-        val serviceIntent = Intent(this, BLEService::class.java)
+        serviceIntent = Intent(this, BLEService::class.java)
         startService(serviceIntent)
     }
 
     private fun showMainFragment() {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_container_view, MainFragment()).commit()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container_view, MainFragment()).commit()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if(serviceIntent!=null){
+            stopService(serviceIntent)
+        }
+
     }
 }
