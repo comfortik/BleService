@@ -25,12 +25,17 @@ import androidx.core.app.ActivityCompat
 import com.example.bleservice.domain.utils.ErrorListener
 import com.example.bleservice.domain.utils.SuccessListener
 import com.example.bleservice.domain.model.Error
+import com.example.bleservice.features.main.presentation.DataTransferState
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 import javax.inject.Inject
 
 
+
+
 class BLEService : Service() {
+    private val SERVICE_UUID: UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")
+    private  val CHARACTERISTIC_UUID: UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
 
     private val binder = LocalBinder()
     private var scanCallback: ScanCallback? = null
@@ -111,8 +116,15 @@ class BLEService : Service() {
             override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     Log.d("BLEService", "Connected to GATT server")
+                    gatt.services.forEach { service ->
+                        Log.d("AAA", "Service UUID: ${service.uuid}")
+                        service.characteristics.forEach { characteristic ->
+                            Log.d("AAA", "Characteristic UUID: ${characteristic.uuid}")
+                        }
+                    }
                     gatt.discoverServices()
                     successListener.onSuccess(true)
+
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     Log.d("BLEService", "Disconnected from GATT server")
                     successListener.onSuccess(false)
@@ -122,11 +134,23 @@ class BLEService : Service() {
             override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     Log.d("BLEService", "GATT services discovered")
+                    val service = gatt.getService(SERVICE_UUID)
+                    if (service != null) {
+                        val characteristic = service.getCharacteristic(CHARACTERISTIC_UUID)
+                        if (characteristic != null) {
+                            Log.d("BLEService", "Characteristic found")
+                        } else {
+                            Log.e("BLEService", "Characteristic not found")
+                        }
+                    } else {
+                        Log.e("BLEService", "Service not found")
+                    }
                 } else {
                     Log.w("BLEService", "onServicesDiscovered received: $status")
                     errorListener.onError(Error.SERVICE_DISCOVERY_FAILED)
                 }
             }
+
 
             override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -151,6 +175,32 @@ class BLEService : Service() {
             }
         }
     }
+    private fun getCharacteristic(serviceUuid: UUID, characteristicUuid: UUID): BluetoothGattCharacteristic? {
+        val service = gatt?.getService(serviceUuid)
+        return service?.getCharacteristic(characteristicUuid)
+    }
+
+    fun writeData(data: ByteArray, successListener: SuccessListener<DataTransferState>, errorListener: ErrorListener) {
+        val characteristic = getCharacteristic(SERVICE_UUID, CHARACTERISTIC_UUID)
+        if (characteristic != null) {
+            successListener.onSuccess(DataTransferState.SENDING)
+            characteristic.value = data
+            val success = gatt?.writeCharacteristic(characteristic) ?: false
+            if (success) {
+                Log.d("BLEService", "Write successful")
+                successListener.onSuccess(DataTransferState.SENT)
+            } else {
+                Log.e("BLEService", "Write failed")
+                errorListener.onError(Error.SEND_FAILED)
+            }
+        } else {
+            Log.e("BLEService", "Characteristic not found")
+            errorListener.onError(Error.SEND_FAILED)
+        }
+    }
+
+
+
 
     override fun onDestroy() {
         super.onDestroy()

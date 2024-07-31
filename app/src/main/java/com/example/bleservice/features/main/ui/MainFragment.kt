@@ -70,6 +70,9 @@ class MainFragment : Fragment(), DeviceAdapter.OnItemClickListener{
         viewModel.connectState.observe(viewLifecycleOwner){
             binding.textView.text = it.name
         }
+        viewModel.dataPacketState.observe(viewLifecycleOwner){
+            binding.dataListener.text = it.toString()
+        }
 
         binding.buttonStart.setOnClickListener {
 
@@ -79,6 +82,10 @@ class MainFragment : Fragment(), DeviceAdapter.OnItemClickListener{
         }
         binding.btnStopScan.setOnClickListener {
             viewModel.stopScan()
+        }
+
+        binding.buttonSendData.setOnClickListener {
+            viewModel.sendData("hello")
         }
 
     }

@@ -2,9 +2,12 @@ package com.example.bleservice.domain.interactor.dataPacket
 
 import com.example.bleservice.domain.model.DataPacket
 import com.example.bleservice.domain.repository.DataPacketRepository
+import com.example.bleservice.domain.utils.ErrorListener
+import com.example.bleservice.domain.utils.SuccessListener
+import com.example.bleservice.features.main.presentation.DataTransferState
 
 class SendDataPacketInteractor(private val dataPacketRepository: DataPacketRepository) {
-    fun execute(dataPacket: DataPacket){
-        dataPacketRepository.sendData(dataPacket)
+    fun execute(dataPacket: DataPacket, successListener: SuccessListener<DataTransferState>, errorListener: ErrorListener){
+        dataPacketRepository.sendData(dataPacket, successListener, errorListener)
     }
 }
