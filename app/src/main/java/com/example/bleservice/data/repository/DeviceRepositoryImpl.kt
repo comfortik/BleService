@@ -3,6 +3,8 @@ package com.example.bleservice.data.repository
 import android.bluetooth.BluetoothDevice
 import com.example.bleservice.data.remote.BLEService
 import com.example.bleservice.domain.repository.DeviceRepository
+import com.example.bleservice.domain.utils.ErrorListener
+import com.example.bleservice.domain.utils.SuccessListener
 import javax.inject.Inject
 
 class DeviceRepositoryImpl @Inject constructor(private val service: BLEService) : DeviceRepository {
@@ -14,8 +16,8 @@ class DeviceRepositoryImpl @Inject constructor(private val service: BLEService) 
         service.stopScanning()
     }
 
-    override fun connectDevice(device: BluetoothDevice) {
-        service.connectDevice(device)
+    override fun connectDevice(device: BluetoothDevice, successListener: SuccessListener<Boolean>, errorListener: ErrorListener) {
+        service.connectDevice(device, successListener, errorListener)
     }
 
     override fun disconnectDevice(device: BluetoothDevice) {

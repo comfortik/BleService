@@ -10,6 +10,9 @@ import com.example.bleservice.domain.interactor.device.ScanDevicesInteractor
 import com.example.bleservice.domain.interactor.device.ConnectDeviceInteractor
 import com.example.bleservice.domain.interactor.device.DeviceInteractors
 import com.example.bleservice.domain.interactor.device.DisconnectDeviceInteractor
+import com.example.bleservice.domain.model.Error
+import com.example.bleservice.domain.utils.ErrorListener
+import com.example.bleservice.domain.utils.SuccessListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -21,6 +24,9 @@ class MainViewModel @Inject constructor(
 
     private val _devices = MutableLiveData<List<BluetoothDevice>>()
     val devices: LiveData<List<BluetoothDevice>> = _devices
+
+    private val _connectState = MutableLiveData<MainState>()
+    val connectState :LiveData<MainState> = _connectState
 
     val deviceList= HashMap<String, BluetoothDevice>()
     fun scanDevices() {
@@ -34,9 +40,26 @@ class MainViewModel @Inject constructor(
     fun stopScan(){
         deviceInteractors.stopScanInteractor().execute()
     }
-
     fun connectDevice(device: BluetoothDevice) {
-        deviceInteractors.connectDeviceInteractor().execute(device)
+        _connectState.value = MainState.LOADING
+        deviceInteractors.connectDeviceInteractor().execute(
+            device,
+            object : SuccessListener<Boolean> {
+                override fun onSuccess(result: Boolean) {
+                    if(result){
+                        _connectState.postValue(MainState.SUCCESS)
+                    }else{
+                        _connectState.postValue(MainState.ERROR)
+                    }
+                }
+            },
+            object :ErrorListener{
+                override fun onError(error: Error) {
+                    _connectState.value = MainState.ERROR
+                }
+
+            }
+        )
     }
 
     fun disconnectDevice(device: BluetoothDevice) {

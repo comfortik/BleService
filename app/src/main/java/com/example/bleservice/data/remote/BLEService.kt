@@ -22,6 +22,9 @@ import android.os.IBinder
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.example.bleservice.domain.utils.ErrorListener
+import com.example.bleservice.domain.utils.SuccessListener
+import com.example.bleservice.domain.model.Error
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
 import javax.inject.Inject
@@ -31,8 +34,8 @@ class BLEService : Service() {
 
     private val binder = LocalBinder()
     private var scanCallback: ScanCallback? = null
-    private lateinit var adapter:BluetoothAdapter
-    private lateinit var  bluetoothManager:BluetoothManager
+    private lateinit var adapter: BluetoothAdapter
+    private lateinit var bluetoothManager: BluetoothManager
     private var gatt: BluetoothGatt? = null
 
     inner class LocalBinder : Binder() {
@@ -44,7 +47,6 @@ class BLEService : Service() {
         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         Log.d("BLES", "Bluetooth initialized: ")
     }
-
 
     override fun onBind(intent: Intent): IBinder {
         Log.d("BLES", "Service bind")
@@ -62,8 +64,6 @@ class BLEService : Service() {
             Log.e("BLES", "Bluetooth is not enabled")
             return
         }
-
-
 
         val settings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -90,49 +90,65 @@ class BLEService : Service() {
         Log.d("BLES", "Scanning started")
     }
 
-
     fun stopScanning() {
         Log.d("BLEService", "Scan stopped")
-            adapter.bluetoothLeScanner.stopScan(scanCallback)
-
-
-    }
-    fun connectDevice(device: BluetoothDevice) {
-        gatt = device.connectGatt(this, false, gattCallback)
+        adapter.bluetoothLeScanner.stopScan(scanCallback)
     }
 
-    private val gattCallback = object : BluetoothGattCallback() {
-        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d("BLEService", "Connected to GATT server")
-                gatt.discoverServices()
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("BLEService", "Disconnected from GATT server")
-            }
-        }
+    fun connectDevice(
+        device: BluetoothDevice,
+        successListener: SuccessListener<Boolean>,
+        errorListener: ErrorListener
+    ) {
+        gatt = device.connectGatt(this, false, createGattCallback(successListener, errorListener))
+    }
 
-        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("BLEService", "GATT services discovered")
-            } else {
-                Log.w("BLEService", "onServicesDiscovered received: $status")
+    private fun createGattCallback(
+        successListener: SuccessListener<Boolean>,
+        errorListener: ErrorListener
+    ): BluetoothGattCallback {
+        return object : BluetoothGattCallback() {
+            override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    Log.d("BLEService", "Connected to GATT server")
+                    gatt.discoverServices()
+                    successListener.onSuccess(true)
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    Log.d("BLEService", "Disconnected from GATT server")
+                    successListener.onSuccess(false)
+                }
             }
-        }
 
-        override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("BLEService", "Characteristic read: ${characteristic.value}")
+            override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Log.d("BLEService", "GATT services discovered")
+                } else {
+                    Log.w("BLEService", "onServicesDiscovered received: $status")
+                    errorListener.onError(Error.SERVICE_DISCOVERY_FAILED)
+                }
             }
-        }
 
-        override fun onCharacteristicWrite(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("BLEService", "Characteristic written: ${characteristic.value}")
+            override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Log.d("BLEService", "Characteristic read: ${characteristic.value}")
+                } else {
+                    Log.w("BLEService", "onCharacteristicRead received: $status")
+                    errorListener.onError(Error.CHARACTERISTIC_READ_FAILED)
+                }
             }
-        }
 
-        override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
-            Log.d("BLEService", "Characteristic changed: ${characteristic.value}")
+            override fun onCharacteristicWrite(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Log.d("BLEService", "Characteristic written: ${characteristic.value}")
+                } else {
+                    Log.w("BLEService", "onCharacteristicWrite received: $status")
+                    errorListener.onError(Error.CHARACTERISTIC_WRITE_FAILED)
+                }
+            }
+
+            override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
+                Log.d("BLEService", "Characteristic changed: ${characteristic.value}")
+            }
         }
     }
 
@@ -142,6 +158,4 @@ class BLEService : Service() {
         stopScanning()
         Log.d("BLEService", "Service destroyed")
     }
-
-
 }

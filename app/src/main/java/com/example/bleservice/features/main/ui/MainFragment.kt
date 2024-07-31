@@ -67,6 +67,9 @@ class MainFragment : Fragment(), DeviceAdapter.OnItemClickListener{
 
             adapter.submitList(it)
         }
+        viewModel.connectState.observe(viewLifecycleOwner){
+            binding.textView.text = it.name
+        }
 
         binding.buttonStart.setOnClickListener {
 
